@@ -21,4 +21,3 @@ Square root
 ## File Structure
 ```
 index.html
-style.css
