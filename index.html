@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlexiCalc Pro</title>
+  <style>
+    :root {
+      --background-color: #f4f4f4;
+      --text-color: #000;
+      --button-bg: #fff;
+      --button-text: #000;
+      --operator-bg: #007BFF;
+      --operator-text: #fff;
+      --screen-bg: #222;
+      --screen-text: #fff;
+    }
+
+    [data-theme="dark"] {
+      --background-color: #000;
+      --text-color: #fff;
+      --button-bg: #333;
+      --button-text: #fff;
+      --operator-bg: #ff9500;
+      --operator-text: #fff;
+      --screen-bg: #111;
+      --screen-text: #fff;
+    }
+
+    [data-theme="blue"] {
+      --background-color: #0f0283;
+      --text-color: #0056b3;
+      --button-bg: #918fff;
+      --button-text: #0056b3;
+      --operator-bg: #007BFF;
+      --operator-text: #918fff;
+      --screen-bg: #007BFF;
+      --screen-text: #918fff;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--background-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .theme-dropdown {
+      margin-bottom: 20px;
+      font-size: 1rem;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .calculator-name {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-bottom: 50px;
+      text-align: center;
+      color: var(--text-color);
+    }
+
+    .calculator {
+      width: 300px;
+      background: var(--button-bg);
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    .calculator-screen {
+      width: 100%;
+      height: 80px;
+      background: var(--screen-bg);
+      color: var(--screen-text);
+      text-align: right;
+      line-height: 80px;
+      font-size: 2rem;
+      padding: 0 20px;
+      border: none;
+      outline: none;
+    }
+
+    .calculator-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: #ddd;
+    }
+
+    button {
+      height: 60px;
+      font-size: 1.2rem;
+      border: none;
+      background: var(--button-bg);
+      color: var(--button-text);
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:active {
+      background: #ccc;
+    }
+
+    .operator {
+      background: var(--operator-bg);
+      color: var(--operator-text);
+    }
+
+    .operator:active {
+      background: #e08900;
+    }
+
+    .equal-sign {
+      background: #28a745;
+      color: #fff;
+      grid-column: span 2;
+    }
+
+    .equal-sign:active {
+      background: #218838;
+    }
+
+    .info {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: var(--text-color);
+    }
+  </style>
+</head>
+<body>
+   <h1> <div class="calculator-name">FlexiCalc Pro</div></h1> <!-- Calculator Name --> 
+
+  <select class="theme-dropdown" id="themeDropdown" onchange="changeTheme()">
+    <option value="light">Light Theme</option>
+    <option value="dark">Dark Theme</option>
+    <option value="blue">Blue Theme</option>
+  </select>
+
+  <div class="calculator">
+    <input type="text" class="calculator-screen" id="screen" disabled />
+    <div class="calculator-buttons">
+      <!-- Numbers -->
+      <button onclick="appendNumber('7')">7</button>
+      <button onclick="appendNumber('8')">8</button>
+      <button onclick="appendNumber('9')">9</button>
+      <button class="operator" onclick="setOperator('/')">÷</button>
+
+      <button onclick="appendNumber('4')">4</button>
+      <button onclick="appendNumber('5')">5</button>
+      <button onclick="appendNumber('6')">6</button>
+      <button class="operator" onclick="setOperator('*')">×</button>
+
+      <button onclick="appendNumber('1')">1</button>
+      <button onclick="appendNumber('2')">2</button>
+      <button onclick="appendNumber('3')">3</button>
+      <button class="operator" onclick="setOperator('-')">−</button>
+
+      <button onclick="appendNumber('0')">0</button>
+      <button onclick="appendNumber('.')">.</button>
+      <button class="equal-sign" onclick="calculate()">=</button>
+      <button class="operator" onclick="setOperator('+')">+</button>
+
+      <!-- Clear -->
+      <button onclick="clearScreen()" style="grid-column: span 4;">C</button>
+    </div>
+  </div>
+
+  <div class="info">
+    <p>FlexiCalc Pro - Your trusted calculator with theme options.</p>
+  </div>
+
+  <script>
+    let currentInput = '';
+    let operator = '';
+    let previousInput = '';
+
+    function appendNumber(number) {
+      currentInput += number;
+      updateScreen();
+    }
+
+    function setOperator(op) {
+      if (currentInput === '') return;
+      if (previousInput) calculate();
+      operator = op;
+      previousInput = currentInput;
+      currentInput = '';
+      updateScreen();
+    }
+
+    function calculate() {
+      if (!previousInput || !currentInput) return;
+      let result;
+      const prev = parseFloat(previousInput);
+      const curr = parseFloat(currentInput);
+
+      if (isNaN(prev) || isNaN(curr)) return;
+
+      switch (operator) {
+        case '+':
+          result = prev + curr;
+          break;
+        case '-':
+          result = prev - curr;
+          break;
+        case '*':
+          result = prev * curr;
+          break;
+        case '/':
+          result = prev / curr;
+          break;
+        default:
+          return;
+      }
+
+      currentInput = result.toString();
+      operator = '';
+      previousInput = '';
+      updateScreen();
+    }
+
+    function clearScreen() {
+      currentInput = '';
+      operator = '';
+      previousInput = '';
+      updateScreen();
+    }
+
+    function updateScreen() {
+      document.getElementById('screen').value = currentInput;
+    }
+
+    function changeTheme() {
+      const theme = document.getElementById("themeDropdown").value;
+      document.body.setAttribute("data-theme", theme);
+    }
+  </script>
+</body>
+</html>
